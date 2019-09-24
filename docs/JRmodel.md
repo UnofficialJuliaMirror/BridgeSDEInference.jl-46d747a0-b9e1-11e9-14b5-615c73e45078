@@ -10,28 +10,18 @@ struct JRNeuralDiffusion{T} <: ContinuousTimeProcess{ℝ{6, T}}
     a::T
     B::T
     b::T
-    C1::T
-    C2::T
-    C3::T
-    C4::T
+    C::T
     νmax::T
     v0::T
     r::T
     μx::T
     μy::T
     μz::T
-    σx::T
     σy::T
-    σz::T
-    # default constructor
-    function JRNeuralDiffusion(A::T, a::T, B::T, b::T, C1::T,  C2::T,  C3::T,  C4::T,
-            νmax::T, v0::T ,r::T, μx::T, μy::T, μz::T, σx::T, σy::T, σz::T) where T
-        new{T}(A, a, B, b, C1, C2, C3, C4, νmax, v0, r, μx, μy, μz, σx, σy, σz)
-    end
     # constructor given assumption statistical paper
     function JRNeuralDiffusion(A::T, a::T, B::T, b::T, C::T,
-            νmax::T, v0::T ,r::T, μx::T, μy::T, μz::T, σx::T, σy::T, σz::T) where T
-        new{T}(A, a, B, b, C, 0.8C, 0.25C, 0.25C, νmax, v0, r, μx, μy, μz, σx, σy, σz)
+            νmax::T, v0::T ,r::T, μx::T, μy::T, μz::T, σy::T) where T
+        new{T}(A, a, B, b, C, νmax, v0, r, μx, μy, μz, σy)
     end
 end
 ```
@@ -40,26 +30,13 @@ We observe discretly on time a linear combination V_t = L X_t where
 L = @SMatrix [0. 1. -1. 0. 0. 0.]
 ```
 ### Defining the auxiliary model for the pulling term
-For our purposes, we define 2 auxiliary models. One is the linearization of the original model at the final points (`JRNeuralDiffusionAux1`) and the second is the linearization of the original model for the difference the second and third dimension which we actually observe and a linearization around a point fixed by the user for the first dimension which we cannot observe directly (`JRNeuralDiffusionAux2`).
+For our purposes, we define 2 auxiliary models. One is the linearization of the original model at the final points [`JRNeuralDiffusionAux1`](https://github.com/mmider/BridgeSDEInference.jl/blob/c2b938c2c528167bf1f3231fc52ce7a452b7b865/src/JRNeural.jl#L114) and the second is the linearization of the original model for the difference the second and third dimension which we actually observe and a linearization around a point which is fixed by the user for the first dimension which we cannot observe directly [`JRNeuralDiffusionAux2`](https://github.com/mmider/BridgeSDEInference.jl/blob/c2b938c2c528167bf1f3231fc52ce7a452b7b865/src/JRNeural.jl#L222).
 
 ### Simulation
-As already discussed in [this note](docs/generate_data.md), in the file [simulate_JRNeural_to_csv.jl](../scripts/simulate_JRNeural_to_csv.jl) we simulate the whole process and retain at discrete time some data according to the above mentioned observation scheme. The plan is to use real data.
+As already discussed in [this note](docs/generate_data.md), in the file [simulate_JRNeural_to_csv.jl](../scripts/simulate_JRNeural_to_csv.jl) we simulate the whole process and retain at discrete time some data according to the above mentioned observation scheme. We will use simulated data as test before applying our inferential procedure to real datas. Real Datas are collected in EDF (european data format). We downloaded [open source data](https://archive.physionet.org/pn6/chbmit/) and impoted with julia in the script [import_real_data.jl](../scripts/import_real_data.jl)
 
 ### Statistical inference of some parameters
-As discussed in https://arxiv.org/pdf/1903.01138.pdf, subsection 5.2.1., there is identifiability issues. We fix some parameters and we perform inference to the triple `σy, μy, C`. In the mcmc algorithm we set up a  conjugate step for `μy` and a Metropolis Hasting step for `σy` and `C`.  
-
-.......
-
-
-for the conjugate step we need to set the functions \phi which will be used to represent the drift `b(t, x) = \phi_0(t,x) +  μy \phi_1(t, x)`  and we set `\phi_2(t, x)`, `\phi_3(t, x)` to `0` since we do not need to use these functions for `C` and `σy`
-```julia
-phi(::Val{0}, t, x, P::JRNeuralDiffusion) = @SVector [P.A*P.a*(P.μx + sigm(x[2] - x[3], P)) - 2P.a x[4] - P.a*P.a*x[1],
-                                P.A*P.a*P.C2*sigm(P.C1*x[1], P) - 2P.a x[5] - P.a*P.a*x[2],
-                                P.B*P.b*(P.μz + P.C4*sigm(P.C3*x[1], P)) - 2P.b x[6] - P.b*P.b*x[3] ]
-phi(::Val{1}, t, x, P::JRNeuralDiffusion) = @SVector  [0, P.A*P.a0, 0]
-phi(::Val{2}, t, x, P::JRNeuralDiffusion) = @SVector [0.0, 0.0, 0.0]
-phi(::Val{3}, t, x, P::JRNeuralDiffusion) = @SVector [0.0, 0.0, 0.0]
-```
+As discussed in https://arxiv.org/pdf/1903.01138.pdf, subsection 5.2.1., there is identifiability issues. We fix some parameters and we perform inference to the triple `σy, μy, b, C`. In the mcmc algorithm we set up a  conjugate step for `μy` and a Metropolis Hasting step for `σy` and `C`.  
 
 
 
