@@ -24,11 +24,6 @@ struct JRNeuralDiffusion{T} <: ContinuousTimeProcess{ℝ{6, T}}
     μy::T
     μz::T
     σy::T
-    # default constructor
-    function JRNeuralDiffusion(A::T, a::T, B::T, b::T, C1::T,  C2::T,  C3::T,  C4::T,
-            νmax::T, v0::T ,r::T, μx::T, μy::T, μz::T, σy::T) where T
-        new{T}(A, a, B, b, C, νmax, v0, r, μx, μy, μz, σy)
-    end
     # constructor given assumption statistical paper
     function JRNeuralDiffusion(A::T, a::T, B::T, b::T, C::T,
             νmax::T, v0::T ,r::T, μx::T, μy::T, μz::T, σy::T) where T
@@ -128,13 +123,14 @@ struct JRNeuralDiffusionAux1{R, S1, S2} <: ContinuousTimeProcess{ℝ{6, R}}
     t::Float64
     v::S2
     T::Float64
-    # generator given assumptions paper
+    # constructor given assumptions paper
     function JRNeuralDiffusionAux1(A::R, a::R, B::R, b::R, C::R,
                         νmax::R, v0::R ,r::R, σy::R, t::Float64, u::S1,
                         T::Float64, v::S2) where {R, S1, S2}
         new{R, S1, S2}(A, a, B, b, C, νmax, v0, r, σy, t, u, T, v)
     end
 end
+
 """
     sigm(x, P::JRNeuralDiffusionAux1)
 
@@ -312,8 +308,6 @@ b(t, x, P::JRNeuralDiffusionAux2) = B(t,P) * x + β(t,P)
 a(t, P::JRNeuralDiffusionAux2) = σ(t,P) * σ(t, P)'
 clone(P::JRNeuralDiffusionAux2, θ) = JRNeuralDiffusionAux2(θ..., P.t, P.u, P.T, P.v)
 clone(P::JRNeuralDiffusionAux2, θ, v) = JRNeuralDiffusionAux2(θ..., P.t, zero(v), P.T, v)
-params(P::JRNeuralDiffusionAux2) = [P.A, P.a, P.B, P.b, P.C1, P.C2, P.C3, P.C4, P.νmax,
-    P.v0, P.r, P.μx, P.μy, P.σy]
-
+params(P::JRNeuralDiffusionAux2) = [P.σy, P.μy, P.C, P.b]
 constdiff(::JRNeuralDiffusionAux2) = true
 dependsOnParams(::JRNeuralDiffusionAux2) = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
