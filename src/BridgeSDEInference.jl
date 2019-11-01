@@ -9,6 +9,9 @@ using ForwardDiff: value
 export FitzhughDiffusion, FitzhughDiffusionAux, ℝ
 export regularToAlter, alterToRegular, regularToConjug, conjugToRegular, display
 
+# Jansen_and_Rit.jl
+export JRNeuralDiffusion, JRNeuralDiffusionAux2
+
 # types.jl
 export ImproperPrior, NoChangePt, SimpleChangePt
 
@@ -76,6 +79,7 @@ include(joinpath(_DIR, "starting_pt.jl"))
 
 _DIR = "examples"
 include(joinpath(_DIR, "fitzhugh_nagumo.jl"))
+include(joinpath(_DIR, "Jansen_and_Rit.jl"))
 include(joinpath(_DIR, "radial_ornstein_uhlenbeck.jl"))
 include(joinpath(_DIR, "lorenz_system.jl"))
 include(joinpath(_DIR, "lorenz_system_const_vola.jl"))
