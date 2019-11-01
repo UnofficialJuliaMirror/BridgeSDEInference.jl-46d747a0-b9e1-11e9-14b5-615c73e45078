@@ -27,7 +27,7 @@ init_obs = "jr_initial_obs.csv"
       fptOrPartObs) = readDataJRmodel(Val(fptObsFlag), joinpath(OUT_DIR, filename))
 
 # Initial parameter guess.
-θ₀ = [3.25, 0.1, 22.0, 0.05 , 135.0, 5.0, 6.0, 0.56, 0.0, 220.0, 0.0, 2000.0]
+θ₀ = [3.25, 100.0, 22.0, 50.0, 135.0, 5.0, 6.0, 0.56, 0.0, 220.0, 0.0, 2000.0]
 
 #P_Target
 Pˣ = JRNeuralDiffusion(θ₀...)
@@ -39,21 +39,21 @@ setup = MCMCSetup(Pˣ,P̃, PartObs())
 
 # Observation operator and noise
 L = @SMatrix [0. 1. -1. 0. 0. 0.]
-Σdiagel = 10^(-10)
+Σdiagel = 10^(-7)
 Σ = @SMatrix [Σdiagel]
 set_observations!(setup, [L for _ in obs], [Σ for _ in obs], obs, obs_time)
 
 #obsevration frequency
 obs_time[2] - obs_time[1]
 # Imputation grid < observation frequency
-dt = 0.001
+dt = 0.0001
 set_imputation_grid!(setup, dt)
 
 # Parameter update
 param_updt = false
 
 # Memory paramter of the preconditioned Crank Nicolson scheme
-pCN = 0.9
+pCN = 0.95
 
 # Inference on for  b (positive), C (positive), μ_y, σ_y (positive)
 positive = [true, true, false, true]
@@ -96,7 +96,7 @@ set_priors!(setup, priors_par, x0Pr)
 set_blocking!(setup)
 
 # ODE solvers
-set_solver!(setup)
+set_solver!(setup, Vern7(), NoChangePt())
 #  MCMC parameters
 obs_time[2] - obs_time[1]
 num_mcmc_steps = 1000
@@ -115,3 +115,6 @@ initialise!(eltype(x0), setup, true)
 
 # run the
 out = mcmc(setup)
+
+
+out
