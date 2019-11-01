@@ -4,15 +4,12 @@ using DataFrames
 using CSV
 using BridgeSDEInference
 
-SRC_DIR = joinpath(Base.source_dir(), "src")
+SRC_DIR = joinpath(Base.source_dir(), "../")
 AUX_DIR = joinpath(SRC_DIR, "auxiliary")
 include(joinpath(AUX_DIR, "data_simulation_fns.jl"))
-OUT_DIR = joinpath(Base.source_dir(), "output")
+OUT_DIR = joinpath(Base.source_dir(), "../", "output")
 mkpath(OUT_DIR)
-
-include("Jansen_and_Rit.jl")
-FILENAME_OUT = joinpath(OUT_DIR,
-                     "jr_path_part_obs.csv")
+FILENAME_OUT = joinpath(OUT_DIR, "jr_path_part_obs.csv")
 
 ### parameters as Table 1  of
 # https://mathematical-neuroscience.springeropen.com/articles/10.1186/s13408-017-0046-4
@@ -25,7 +22,7 @@ display(P)
 
 x0 = ℝ{6}(0.08,18,15,-0.5,0,0)
 
-dt = 1/100000
+dt = 0.00001
 T = 10.0
 tt = 0.0:dt:T
 
