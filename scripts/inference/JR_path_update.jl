@@ -55,15 +55,25 @@ param_updt = false
 # Memory paramter of the preconditioned Crank Nicolson scheme
 pCN = 0.95
 
-# Inference on for  b (positive), C (positive), μ_y, σ_y (positive)
-positive = [true, true, false, true]
+# Inference for  b (positive), C (positive), μ_y, σ_y (positive)
+positive = [4, 5, 12]
 
 # Transition kernel
-t_kernel = [RandomWalk(fill(0.1, 4), positive)]
+# ?should the RandomWalk be defined for all the 12th parameters?
+ t_kernel = [RandomWalk(fill(0.1, 12), positive),
+            RandomWalk(fill(0.1, 12), positive),
+            RandomWalk(fill(0.1, 12), positive),
+            RandomWalk(fill(0.1, 12), positive)]
 
 # Update parameter list
 BridgeSDEInference.param_names(Pˣ)
-updt_coord = ((4, 5, 10, 12))
+updt_coord = ((4,), (5,), (10,), (12,))
+
+# Update type
+updt_type = (MetropolisHastingsUpdt(),
+            MetropolisHastingsUpdt(),
+            MetropolisHastingsUpdt(),
+            MetropolisHastingsUpdt())
 
 # Update type
 updt_type = (MetropolisHastingsUpdt(), )
@@ -115,6 +125,4 @@ initialise!(eltype(x0), setup, true)
 
 # run the
 out = mcmc(setup)
-
-
-out
+include(joinpath(SRC_DIR, "auxiliary", "plotting_fns.jl"))

@@ -60,18 +60,24 @@ param_updt = true
 pCN = 0.9
 
 # Inference for  b (positive), C (positive), μ_y, σ_y (positive)
-positive = [1,2,4]
+positive = [4, 5, 12]
 
 # Transition kernel
 # ?should the RandomWalk be defined for all the 12th parameters?
- t_kernel = [RandomWalk(fill(0.1, 4), positive)]
+ t_kernel = [RandomWalk(fill(0.1, 12), positive),
+            RandomWalk(fill(0.1, 12), positive),
+            RandomWalk(fill(0.1, 12), positive),
+            RandomWalk(fill(0.1, 12), positive)]
 
 # Update parameter list
 BridgeSDEInference.param_names(Pˣ)
-updt_coord = ((4, 5, 10, 12))
+updt_coord = ((4,), (5,), (10,), (12,))
 
 # Update type
-updt_type = (MetropolisHastingsUpdt(), )
+updt_type = (MetropolisHastingsUpdt(),
+            MetropolisHastingsUpdt(),
+            MetropolisHastingsUpdt(),
+            MetropolisHastingsUpdt())
 
 set_transition_kernels!(setup, t_kernel,
                         pCN,
@@ -105,6 +111,5 @@ set_mcmc_params!(setup, num_mcmc_steps, save_iter,
 
 # Initialisation of internal containers
 initialise!(eltype(x0), setup, true)
-
 
 out = mcmc(setup)
