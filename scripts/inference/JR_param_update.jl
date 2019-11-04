@@ -43,7 +43,7 @@ setup = MCMCSetup(Pˣ,P̃, PartObs())
 
 # Observation operator and noise
 L = @SMatrix [0. 1. -1. 0. 0. 0.]
-Σdiagel = 10^(-7)
+Σdiagel = 10^(-4) #compare the range of the observation with the observation noise to have a reasonable setting
 Σ = @SMatrix [Σdiagel]
 set_observations!(setup, [L for _ in obs], [Σ for _ in obs], obs, obs_time)
 
